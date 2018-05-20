@@ -38,6 +38,25 @@ Methodology:
 | Node - ??        |                      |                       |
 
 
+## Structure of files
+
+This is the structure as of `20180514` dump.
+
+### Labels
+
+- \<labels>/\<label>
+  - \<images>
+    - \<image>
+  - \<id> - a number
+  - \<name> - name of label
+  - \<contactinfo> - small block of text
+  - \<profile> - potentially large block of text
+  - \<data_quality> - one of: 'Needs Vote', 'Complete And Correct', 'Correct', 'Needs Minor Changes', 'Needs Major Changes', 'Entirely Incorrect', 'Entirely Incorrect Edit'
+  - \<urls>/\<url> - text
+  - \<sublabels>
+    - \<label id="123"> - sublabel name; id is a number, likely pointing to a \<label>/\<id> entry
+  - \<parentLabel id="123"> - name of parent label (also identified by `id`)
+
 
 ## Python
 
