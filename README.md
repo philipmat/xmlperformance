@@ -23,7 +23,6 @@ Tests performed on an desktop computer with:
 - Disk: Samsung SSD 850 Pro 512GB
 - OS: Windows 10 Pro 64-bit (version 1803 / build 17134.48)
 
-
 Methodology:
 
 - Fresh run for each language after reboot;
@@ -36,7 +35,6 @@ Methodology:
 | .Net Standard    |                      |                       |
 | Python - xml.sax |                      |                       |
 | Node - ??        |                      |                       |
-
 
 ## Structure of files
 
@@ -54,9 +52,8 @@ This is the structure as of `20180514` dump.
   - \<data_quality> - one of: 'Needs Vote', 'Complete And Correct', 'Correct', 'Needs Minor Changes', 'Needs Major Changes', 'Entirely Incorrect', 'Entirely Incorrect Edit'
   - \<urls>/\<url> - text
   - \<sublabels>
-    - \<label id="123"> - sublabel name; id is a number, likely pointing to a \<label>/\<id> entry
+    - \<label id="123"> - sub-label name; id is a number, likely pointing to a \<label>/\<id> entry
   - \<parentLabel id="123"> - name of parent label (also identified by `id`)
-
 
 ## Python
 

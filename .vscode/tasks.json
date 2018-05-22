@@ -1,0 +1,40 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/dotnet-core/xmlperformance.csproj"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "run dotnet-core labels",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "run",
+                "--project",
+                "${workspaceFolder}/dotnet-core/xmlperformance.csproj",
+                "d:/Projects/xmlperformance/data/labels.xml"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "run dotnet-core artists",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "run",
+                "d:/Projects/xmlperformance/data/artists.xml"
+            ],
+            "options": {
+                "cwd": "${work${workspaceFolder}/dotnet-core"
+            },
+            "problemMatcher": "$msCompile"
+        }
+    ]
+}
