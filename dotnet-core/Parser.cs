@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Xml;
@@ -71,8 +72,21 @@ namespace XmlPerformance
 
         /// <summary>Nodes whose children we can skip parsing (images, sublabels)</summary>
         protected abstract string[] SkipNodes { get; } //
+        
+        protected abstract IDictionary<string, Action<T, string>> ElementSetters { get; }
 
-        protected abstract void SetNodeText(T currentElement, string nodeName, string text);
+
+        protected virtual void SetNodeText(T current, string nodeName, string text) {
+#if (VERBOSE)
+            if (nodeName == "id")
+                System.Console.WriteLine($"[{nodeName, -20}] = {text}");
+#endif
+            if (current == null) return;
+            Action<T, string> setter;
+            if (ElementSetters.TryGetValue(nodeName, out setter)) {
+                setter(current, text);
+            }
+        }
 
         private static bool IsTextNode(XmlReader reader, string lastElement)
         {
