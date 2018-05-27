@@ -11,7 +11,7 @@
             "preLaunchTask": "build",
             "program": "${workspaceFolder}/dotnet-core/bin/Debug/netcoreapp2.0/xmlperformance.dll",
             "args": [
-                "d:/Projects/xmlperformance/data/labels.xml"
+                "${workspaceFolder}/data/artists-20180514_test50.xml"
             ],
             "cwd": "${workspaceFolder}/dotnet-core",
             "console": "internalConsole",

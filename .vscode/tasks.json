@@ -19,7 +19,7 @@
                 "run",
                 "--project",
                 "${workspaceFolder}/dotnet-core/xmlperformance.csproj",
-                "d:/Projects/xmlperformance/data/labels.xml"
+                "${workspaceFolder}/data/labels-20180514_test56.xml"
             ],
             "problemMatcher": "$msCompile"
         },
