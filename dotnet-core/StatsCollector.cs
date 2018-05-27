@@ -42,8 +42,10 @@ namespace XmlPerformance
         }
 
         public async Task PrintStatsAsync(TextWriter writer) {
+            var total = _dataQualityLedger.Sum(x => x.Value);
             var elements = _dataQualityLedger.OrderBy(x => x.Key)
-                .Select(x => $"{x.Key,-20} = {x.Value,-10}");
+                .Select(x => $"  {x.Key,-20} = {x.Value,-10}");
+            await writer.WriteLineAsync($"Total: {total}.");
             await writer.WriteLineAsync(string.Join("\n", elements));
         }
 
