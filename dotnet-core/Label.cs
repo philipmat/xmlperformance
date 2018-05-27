@@ -41,7 +41,10 @@ namespace XmlPerformance
         protected override string[] SkipNodes => new string[] { "sublabels", "images" };
 
         protected override void SetNodeText(Label current, string nodeName, string text) {
-            System.Console.WriteLine($"[{nodeName, -20}] = {text}");
+#if (VERBOSE)
+            if (nodeName == "id")
+                System.Console.WriteLine($"[{nodeName, -20}] = {text}");
+#endif
             if (current == null) return;
             Action<Label, string> setter;
             if (_setters.TryGetValue(nodeName, out setter)) {
