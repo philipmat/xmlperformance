@@ -26,8 +26,12 @@ namespace XmlPerformance
             var parser = GetParser(file);
             if (parser == null) return ExitCodeIncorrectFile;
 
+            var sw = new System.Diagnostics.Stopwatch();
+            sw.Start();
             var nodes = await parser.ParseAsync(statsCollector);
+            sw.Stop();
             await statsCollector.PrintStatsAsync(Console.Out);
+            Console.Out.WriteLine($"Parsing of {file} took {sw.ElapsedMilliseconds:n0} ms.");
             return 0;
         }
 
