@@ -41,12 +41,12 @@ namespace XmlPerformance
             IncrementDataQuality(artist.DataQuality);
         }
 
-        public async Task PrintStatsAsync(TextWriter writer) {
+        public void PrintStats(TextWriter writer) {
             var total = _dataQualityLedger.Sum(x => x.Value);
             var elements = _dataQualityLedger.OrderBy(x => x.Key)
-                .Select(x => $"  {x.Key,-20} = {x.Value,-10}");
-            await writer.WriteLineAsync($"Total: {total}.");
-            await writer.WriteLineAsync(string.Join("\n", elements));
+                .Select(x => $"  {x.Key,-25} = {x.Value,10:n0}");
+            writer.WriteLine($"Total: {total:n0} entries.");
+            writer.WriteLine(string.Join("\n", elements));
         }
 
         private void IncrementDataQuality(string dataQuality) {

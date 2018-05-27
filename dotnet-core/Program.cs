@@ -28,10 +28,17 @@ namespace XmlPerformance
 
             var sw = new System.Diagnostics.Stopwatch();
             sw.Start();
+
             var nodes = await parser.ParseAsync(statsCollector);
+
+            // get measurements before performing any operations in collector
             sw.Stop();
-            await statsCollector.PrintStatsAsync(Console.Out);
-            Console.Out.WriteLine($"Parsing of {file} took {sw.ElapsedMilliseconds:n0} ms.");
+            System.Diagnostics.Process currentProcess = System.Diagnostics.Process.GetCurrentProcess();
+            long totalBytesOfMemoryUsed = currentProcess.WorkingSet64; 
+
+            // print stats
+            statsCollector.PrintStats(Console.Out);
+            Console.Out.WriteLine($"Parsing of {file} took {sw.ElapsedMilliseconds:n0} ms and used {totalBytesOfMemoryUsed:n0} bytes of memory.");
             return 0;
         }
 
