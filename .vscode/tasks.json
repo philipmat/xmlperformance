@@ -29,11 +29,10 @@
             "type": "process",
             "args": [
                 "run",
-                "d:/Projects/xmlperformance/data/artists.xml"
+                "--project",
+                "${workspaceFolder}/dotnet-core/xmlperformance.csproj",
+                "${workspaceFolder}/data/artists-20180514_test50.xml"
             ],
-            "options": {
-                "cwd": "${work${workspaceFolder}/dotnet-core"
-            },
             "problemMatcher": "$msCompile"
         }
     ]
