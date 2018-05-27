@@ -29,6 +29,7 @@ namespace XmlPerformance
         };
 
         public void Visit(Label label) {
+            if (label.Id == 0) return;
             if (string.IsNullOrEmpty(label.DataQuality)) {
                 Console.Error.WriteLine($"Label {label.Name} is missing data quality.");
                 return;
