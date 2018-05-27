@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 namespace XmlPerformance
 {
+    [System.Diagnostics.DebuggerDisplay("{Id} - {Name} ({DataQuality})")]
     class Label : IAcceptVisitor<IVisitor>
     {
         public int Id { get; set; }
