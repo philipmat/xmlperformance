@@ -5,6 +5,10 @@ using System.Xml;
 
 namespace XmlPerformance
 {
+    /// <summary>
+    /// Root class of individual parsers.
+    /// Assumes a simple &lt;tag&gt;text&lt;/tag&gt; approach to parsing, with no deep levels
+    /// </summary>
     abstract class Parser<T>
         where T : IAcceptVisitor<IVisitor>, new()
     {
@@ -23,37 +27,70 @@ namespace XmlPerformance
             using(var reader = XmlReader.Create(_file, readerSettings)) {
                 reader.ReadToFollowing(MainNodeName);
                 T current = new T();
+                string lastElement = null;
                 while(await reader.ReadAsync()) {
-                    Console.WriteLine($"{reader.Name} - {reader.NodeType}");
-                    if (reader.NodeType == XmlNodeType.Element) {
-                        // Console.WriteLine($"{reader.Name} [{reader.NodeType}]");
-                        var nodeName = reader.Name;
-                        if (SkipNodes.Any(textNode => textNode.Equals(nodeName, StringComparison.OrdinalIgnoreCase))) {
+                    if (reader.NodeType == XmlNodeType.Element && reader.IsStartElement()) {
+                        if(ShouldSkip(reader))
+                        {
+                            // skips the current node and advances to the next one
                             reader.Skip();
+                            if (reader.NodeType == XmlNodeType.EndElement) {
+                                // next node is an end-element, continue
+                                continue;
+                            }
+                        }
+                        var nodeName = reader.Name;
+                        if (IsNewMainNode(nodeName)) {
+                            // collect stats and start new node
+                            CollectStats(statsCollector, current);
+                            current = new T();
                             continue;
                         }
-                        if (nodeName.Equals(MainNodeName, StringComparison.OrdinalIgnoreCase)) {
-                            // finish last element
-                            current?.Accept(statsCollector);
-                            current = new T();
-                        }
-                        if (TextNodes.Any(textNode => textNode.Equals(nodeName, StringComparison.OrdinalIgnoreCase))) {
-                            var text = await reader.ReadElementContentAsStringAsync();
-                            SetNodeText(current, nodeName, text);
-                        }
+                        lastElement = IsRelevantNode(nodeName) ? nodeName : null;
                         nodes++;
+                    } else if (IsTextNode(reader, lastElement)) {
+                        SetNodeText(current, lastElement, reader.Value);
                     }
+                }
+                if (current != null) {
+                    CollectStats(statsCollector, current);
                 }
             }
             return nodes;
         }
 
+        private void CollectStats(IVisitor statsCollector, T current)
+        {
+            current?.Accept(statsCollector);
+        }
+
         protected abstract string MainNodeName { get; }
 
-        /// <summary>Comma-
+        /// <summary>Nodes whose text we care to collect (eg id, name)</summary>
         protected abstract string[] TextNodes { get; } //
+
+        /// <summary>Nodes whose children we can skip parsing (images, sublabels)</summary>
         protected abstract string[] SkipNodes { get; } //
 
         protected abstract void SetNodeText(T currentElement, string nodeName, string text);
+
+        private static bool IsTextNode(XmlReader reader, string lastElement)
+        {
+            return reader.NodeType == XmlNodeType.Text && !string.IsNullOrEmpty(lastElement);
+        }
+
+        /// <summary>Skips the current node and advances to the next one if it's part of <see cref="SkipNodes"/>.null</summary>
+        private bool ShouldSkip(XmlReader reader) {
+            return SkipNodes.Any(textNode => textNode.Equals(reader.Name, StringComparison.OrdinalIgnoreCase));
+        }
+
+        private bool IsNewMainNode(string nodeName) {
+            return nodeName.Equals(MainNodeName, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private bool IsRelevantNode(string nodeName)
+        {
+            return TextNodes.Any(textNode => textNode.Equals(nodeName, StringComparison.OrdinalIgnoreCase));
+        }
     }
 }
