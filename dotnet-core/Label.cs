@@ -28,10 +28,10 @@ namespace XmlPerformance
         }
 
         protected override string MainNodeName => "label";
-        protected override string[] TextNodes => new string[] { "id", "name", "contactInfo", "profile", "data_quality", "url" };
-        protected override string[] SkipNodes => new string[] { "sublabels", "images" };
+        protected override string[] TextNodes { get; } = new string[] { "id", "name", "contactInfo", "profile", "data_quality", "url" };
+        protected override string[] SkipNodes { get; } =  new string[] { "sublabels", "images" };
 
-        protected override IDictionary<string, Action<Label, string>> ElementSetters => new Dictionary<string, Action<Label, string>>(StringComparer.OrdinalIgnoreCase) {
+        protected override IDictionary<string, Action<Label, string>> ElementSetters { get; } = new Dictionary<string, Action<Label, string>>(StringComparer.OrdinalIgnoreCase) {
             ["id"] = (l, v) => l.Id = int.Parse(v),
             ["name"] = (l, v) => l.Name = v,
             ["contactInfo"] = (l, v) => l.ContactInfo = v,

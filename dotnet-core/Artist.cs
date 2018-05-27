@@ -31,11 +31,11 @@ namespace XmlPerformance
 
         protected override string MainNodeName => "artist";
 
-        protected override string[] TextNodes => new string[] { "id", "name", "realname", "profile", "data_quality", "url" };
+        protected override string[] TextNodes { get; } = new string[] { "id", "name", "realname", "profile", "data_quality", "url" };
 
-        protected override string[] SkipNodes => new string[] { "images", "namevariations", "aliases", "groups", "members" };
+        protected override string[] SkipNodes { get; } = new string[] { "images", "namevariations", "aliases", "groups", "members" };
 
-        protected override IDictionary<string, Action<Artist, string>> ElementSetters => new Dictionary<string, Action<Artist, string>>(StringComparer.OrdinalIgnoreCase) {
+        protected override IDictionary<string, Action<Artist, string>> ElementSetters { get; } = new Dictionary<string, Action<Artist, string>>(StringComparer.OrdinalIgnoreCase) {
             ["id"] = (l, v) => l.Id = int.Parse(v),
             ["name"] = (l, v) => l.Name = v,
             ["realname"] = (l, v) => l.RealName = v,
