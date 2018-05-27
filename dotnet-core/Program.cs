@@ -13,23 +13,34 @@ namespace XmlPerformance
                 Help();
                 return ExitCodeIncorrectParams;
             }
+            var result = Task.Run(async () =>
+            {
+                return await MainAsync(args);
+            }).GetAwaiter().GetResult();
+            return result;
+        }
+
+        private static async Task<int> MainAsync(string[] args) {
             var file = args[0];
             var statsCollector = new StatsCollector();
+            var parser = GetParser(file);
+            if (parser == null) return ExitCodeIncorrectFile;
+
+            var nodes = await parser.ParseAsync(statsCollector);
+            await statsCollector.PrintStatsAsync(Console.Out);
+            return 0;
+        }
+
+        private static IParser GetParser(string file) {
             if (file.IndexOf("labels", StringComparison.OrdinalIgnoreCase) != -1) {
                 Console.WriteLine("Performing Labels test");
-                Task.Run(async () =>
-                {
-                    var nodes = await new LabelParser(file).ParseAsync(statsCollector);
-                    await statsCollector.PrintStatsAsync(Console.Out);
-                }).GetAwaiter().GetResult();
-                return 0;
+                return new LabelParser(file);
             }
             if (file.IndexOf("artists", StringComparison.OrdinalIgnoreCase) != -1) {
                 Console.WriteLine("Performing Artists test");
-                return 0;
+                return new ArtistParser(file);
             }
-
-            return ExitCodeIncorrectFile;
+            return null;
         }
 
         private static void Help() {

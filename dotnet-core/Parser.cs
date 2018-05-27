@@ -6,11 +6,16 @@ using System.Xml;
 
 namespace XmlPerformance
 {
+    interface IParser
+    {
+        Task<int> ParseAsync(IVisitor statsCollector);
+    }
+
     /// <summary>
     /// Root class of individual parsers.
     /// Assumes a simple &lt;tag&gt;text&lt;/tag&gt; approach to parsing, with no deep levels
     /// </summary>
-    abstract class Parser<T>
+    abstract class Parser<T> : IParser
         where T : IAcceptVisitor<IVisitor>, new()
     {
         private readonly string _file;
