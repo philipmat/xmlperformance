@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Xml;
@@ -30,37 +32,46 @@ namespace XmlPerformance
             var readerSettings = new XmlReaderSettings {
                 Async = true
             };
-            using(var reader = XmlReader.Create(_file, readerSettings)) {
-                reader.ReadToFollowing(MainNodeName);
-                T current = new T();
-                string lastElement = null;
-                while(await reader.ReadAsync()) {
-                    if (reader.NodeType == XmlNodeType.Element && reader.IsStartElement()) {
-                        if(ShouldSkip(reader))
-                        {
-                            // skips the current node and advances to the next one
-                            reader.Skip();
-                            if (reader.NodeType == XmlNodeType.EndElement) {
-                                // next node is an end-element, continue
+            Stream inputStream, fileStream;
+            inputStream = fileStream = File.OpenRead(_file);;
+            if(_file.EndsWith(".gz", StringComparison.OrdinalIgnoreCase)) {
+                inputStream = new GZipStream(fileStream, CompressionMode.Decompress);
+            }
+            try {
+                using (var reader = XmlReader.Create(inputStream, readerSettings)) {
+                    reader.ReadToFollowing(MainNodeName);
+                    T current = new T();
+                    string lastElement = null;
+                    while (await reader.ReadAsync()) {
+                        if (reader.NodeType == XmlNodeType.Element && reader.IsStartElement()) {
+                            if (ShouldSkip(reader)) {
+                                // skips the current node and advances to the next one
+                                reader.Skip();
+                                if (reader.NodeType == XmlNodeType.EndElement) {
+                                    // next node is an end-element, continue
+                                    continue;
+                                }
+                            }
+                            var nodeName = reader.Name;
+                            if (IsNewMainNode(nodeName)) {
+                                // collect stats and start new node
+                                CollectStats(statsCollector, current);
+                                current = new T();
                                 continue;
                             }
+                            lastElement = IsRelevantNode(nodeName) ? nodeName : null;
+                            nodes++;
+                        } else if (IsTextNode(reader, lastElement)) {
+                            SetNodeText(current, lastElement, reader.Value);
                         }
-                        var nodeName = reader.Name;
-                        if (IsNewMainNode(nodeName)) {
-                            // collect stats and start new node
-                            CollectStats(statsCollector, current);
-                            current = new T();
-                            continue;
-                        }
-                        lastElement = IsRelevantNode(nodeName) ? nodeName : null;
-                        nodes++;
-                    } else if (IsTextNode(reader, lastElement)) {
-                        SetNodeText(current, lastElement, reader.Value);
+                    }
+                    if (current != null) {
+                        CollectStats(statsCollector, current);
                     }
                 }
-                if (current != null) {
-                    CollectStats(statsCollector, current);
-                }
+            } finally {
+                inputStream.Dispose();
+                fileStream.Dispose();
             }
             return nodes;
         }
