@@ -5,6 +5,16 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Python - Labels",
+            "type": "pythonExperimental",
+            "request": "launch",
+            "program": "${file}",
+            "args": [
+                "${workspaceFolder}/data/labels-20180514_test56.xml"
+            ],
+            "console": "integratedTerminal"
+        },
+        {
             "name": ".NET Core Launch (console)",
             "type": "coreclr",
             "request": "launch",
