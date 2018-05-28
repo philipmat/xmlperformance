@@ -14,3 +14,11 @@ net-labels:
 net-artists:
 	dotnet run --project dotnet-core/xmlperformance.csproj ./data/$(ARTISTS)
 net-all: net-labels net-artists
+
+py-labels:
+	python3 python/main.py ./data/$(LABELS)
+
+py-artists:
+	python3 python/main.py ./data/$(LABELS)
+
+py-all: py-labels py-artists
