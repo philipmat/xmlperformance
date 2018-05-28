@@ -1,8 +1,9 @@
 import gzip
-import sys
-from xml.sax import make_parser
-from handlers import LabelsHandler
+import time
 import stats
+import sys
+from handlers import LabelsHandler
+from xml.sax import make_parser
 
 
 def make_handler(file: str, collector):
@@ -15,8 +16,13 @@ def parse(file: str, parser) -> None:
     _open = open
     if file.endswith(".gz"):
         _open = gzip.open
-    with _open(file) as f:
+    with _open(file, encoding="utf8") as f:
         parser.parse(f)
+
+
+def time_format(time: float):
+    multiplier, ms = (1, "s") if time > 10 else (1000, "ms")
+    return f"{time * multiplier:,.0f}{ms}"
 
 
 def main(argv):
@@ -29,8 +35,11 @@ def main(argv):
 
     parser = make_parser()
     parser.setContentHandler(handler)
+    ts = time.time()
     parse(file, parser)
+    elapsed = time.time() - ts
     print(str(collector))
+    print(f"Parsing of {file} took {time_format(elapsed)} and used ?? bytes of memory.")
 
 
 if __name__ == "__main__":
