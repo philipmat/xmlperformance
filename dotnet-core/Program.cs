@@ -38,8 +38,18 @@ namespace XmlPerformance
 
             // print stats
             statsCollector.PrintStats(Console.Out);
-            Console.Out.WriteLine($"Parsing of {file} took {sw.ElapsedMilliseconds:n0} ms and used {totalBytesOfMemoryUsed:n0} bytes of memory.");
+            Console.Out.WriteLine($"Parsing of {file} took {FormatTime(sw.ElapsedMilliseconds)} and used {totalBytesOfMemoryUsed:n0} bytes of memory.");
             return 0;
+        }
+
+        private static string FormatTime(long milliseconds) {
+            float multiplier = 1;
+            string unit = "ms";
+            if (milliseconds > 10_000) {
+                multiplier = 1E-3F;
+                unit = "s";
+            }
+            return $"{milliseconds*multiplier:n0}{unit}";
         }
 
         private static IParser GetParser(string file) {
