@@ -1,6 +1,6 @@
 import xml.sax.handler
-from typing import List
 from models import Label
+from typing import List
 
 
 class BaseHandler(xml.sax.handler.ContentHandler):
