@@ -1,4 +1,5 @@
-﻿using System;
+﻿#undef ASYNC
+using System;
 using System.Threading.Tasks;
 
 namespace XmlPerformance
@@ -13,14 +14,6 @@ namespace XmlPerformance
                 Help();
                 return ExitCodeIncorrectParams;
             }
-            var result = Task.Run(async () =>
-            {
-                return await MainAsync(args);
-            }).GetAwaiter().GetResult();
-            return result;
-        }
-
-        private static async Task<int> MainAsync(string[] args) {
             var file = args[0];
             var statsCollector = new StatsCollector();
             var parser = GetParser(file);
@@ -29,7 +22,15 @@ namespace XmlPerformance
             var sw = new System.Diagnostics.Stopwatch();
             sw.Start();
 
-            var nodes = await parser.ParseAsync(statsCollector);
+            int nodes = 0;
+#if ASYNC
+            nodes = Task.Run(async () =>
+            {
+                return await parser.ParseAsync(statsCollector);
+            }).GetAwaiter().GetResult();
+#else
+            nodes = parser.Parse(statsCollector);
+#endif
 
             // get measurements before performing any operations in collector
             sw.Stop();

@@ -11,6 +11,7 @@ namespace XmlPerformance
     interface IParser
     {
         Task<int> ParseAsync(IVisitor statsCollector);
+        int Parse(IVisitor statsCollector);
     }
 
     /// <summary>
@@ -26,44 +27,20 @@ namespace XmlPerformance
         {
             this._file = file;
         }
-        public async Task<int> ParseAsync(IVisitor statsCollector)
-        {
+        public async Task<int> ParseAsync(IVisitor statsCollector) {
             var nodes = 0;
             var readerSettings = new XmlReaderSettings {
                 Async = true
             };
-            Stream inputStream, fileStream;
-            inputStream = fileStream = File.OpenRead(_file);;
-            if(_file.EndsWith(".gz", StringComparison.OrdinalIgnoreCase)) {
-                inputStream = new GZipStream(fileStream, CompressionMode.Decompress);
-            }
+            InputStream inputStream = GetInputStream();
             try {
-                using (var reader = XmlReader.Create(inputStream, readerSettings)) {
+                using (var reader = XmlReader.Create(inputStream.ReadStream, readerSettings)) {
                     reader.ReadToFollowing(MainNodeName);
                     T current = new T();
                     string lastElement = null;
                     while (await reader.ReadAsync()) {
-                        if (reader.NodeType == XmlNodeType.Element && reader.IsStartElement()) {
-                            if (ShouldSkip(reader)) {
-                                // skips the current node and advances to the next one
-                                reader.Skip();
-                                if (reader.NodeType == XmlNodeType.EndElement) {
-                                    // next node is an end-element, continue
-                                    continue;
-                                }
-                            }
-                            var nodeName = reader.Name;
-                            if (IsNewMainNode(nodeName)) {
-                                // collect stats and start new node
-                                CollectStats(statsCollector, current);
-                                current = new T();
-                                continue;
-                            }
-                            lastElement = IsRelevantNode(nodeName) ? nodeName : null;
-                            nodes++;
-                        } else if (IsTextNode(reader, lastElement)) {
-                            SetNodeText(current, lastElement, reader.Value);
-                        }
+                        Read(reader, ref current, ref lastElement, statsCollector);
+                        nodes++;
                     }
                     if (current != null) {
                         CollectStats(statsCollector, current);
@@ -71,9 +48,60 @@ namespace XmlPerformance
                 }
             } finally {
                 inputStream.Dispose();
-                fileStream.Dispose();
             }
             return nodes;
+        }
+
+        public int Parse(IVisitor statsCollector) {
+            var nodes = 0;
+            var readerSettings = new XmlReaderSettings {
+                Async = false
+            };
+            InputStream inputStream = GetInputStream();
+            try {
+                using (var reader = XmlReader.Create(inputStream.ReadStream, readerSettings)) {
+                    reader.ReadToFollowing(MainNodeName);
+                    T current = new T();
+                    string lastElement = null;
+                    while (reader.Read()) {
+                        Read(reader, ref current, ref lastElement, statsCollector);
+                        nodes++;
+                    }
+                    if (current != null) {
+                        CollectStats(statsCollector, current);
+                    }
+                }
+            } finally {
+                inputStream.Dispose();
+            }
+            return nodes;
+        }
+
+        private void Read(XmlReader reader, ref T current, ref string lastElement,  IVisitor statsCollector) {
+            if (reader.NodeType == XmlNodeType.Element && reader.IsStartElement()) {
+                if (ShouldSkip(reader)) {
+                    // skips the current node and advances to the next one
+                    reader.Skip();
+                    if (reader.NodeType == XmlNodeType.EndElement) {
+                        // next node is an end-element, continue
+                        return;
+                    }
+                }
+                var nodeName = reader.Name;
+                if (IsNewMainNode(nodeName)) {
+                    // collect stats and start new node
+                    CollectStats(statsCollector, current);
+                    current = new T();
+                    return;
+                }
+                lastElement = IsRelevantNode(nodeName) ? nodeName : null;
+            } else if (IsTextNode(reader, lastElement)) {
+                SetNodeText(current, lastElement, reader.Value);
+            }
+        }
+
+        private InputStream GetInputStream() {
+            return new InputStream(_file);
         }
 
         private void CollectStats(IVisitor statsCollector, T current)
@@ -121,6 +149,48 @@ namespace XmlPerformance
         private bool IsRelevantNode(string nodeName)
         {
             return TextNodes.Any(textNode => textNode.Equals(nodeName, StringComparison.OrdinalIgnoreCase));
+        }
+
+        private class InputStream : IDisposable
+        {
+            private bool disposedValue = false; // To detect redundant calls
+            private Stream fileStream;
+            private Stream readStream;
+
+            public InputStream(string file)
+            {
+                readStream = fileStream = File.OpenRead(file);;
+                if(file.EndsWith(".gz", StringComparison.OrdinalIgnoreCase)) {
+                    readStream = new GZipStream(fileStream, CompressionMode.Decompress);
+                }
+            }
+
+            public Stream ReadStream => readStream;
+
+            protected virtual void Dispose(bool disposing)
+            {
+                if (!disposedValue)
+                {
+                    if (disposing)
+                    {
+                        // TODO: dispose managed state (managed objects).
+                        readStream.Dispose();
+                        fileStream.Dispose();
+                    }
+
+                    // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
+                    // TODO: set large fields to null.
+
+                    disposedValue = true;
+                }
+            }
+
+            // This code added to correctly implement the disposable pattern.
+            public void Dispose()
+            {
+                // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+                Dispose(true);
+            }
         }
     }
 }
