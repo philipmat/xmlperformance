@@ -27,7 +27,7 @@ py-labels:
 	python3 python/main.py ./data/$(LABELS)
 
 py-artists:
-	python3 python/main.py ./data/$(LABELS)
+	python3 python/main.py ./data/$(ARTISTS)
 
 py-all: py-labels py-artists
 
