@@ -3,6 +3,8 @@
 LABELS = labels-20180514_test56.xml
 ARTISTS = artists-20180514_test50.xml
 
+run-all: net-all py-all
+
 # .NET
 
 net-compile:
