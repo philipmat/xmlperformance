@@ -8,7 +8,7 @@
             "name": "Python - Labels",
             "type": "pythonExperimental",
             "request": "launch",
-            "program": "${file}",
+            "program": "${workspaceFolder}/python/main.py",
             "args": [
                 "${workspaceFolder}/data/labels-20180514_test56.xml"
             ],

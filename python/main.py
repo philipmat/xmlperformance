@@ -2,13 +2,15 @@ import gzip
 import time
 import stats
 import sys
-from handlers import LabelsHandler
+from handlers import LabelsHandler, ArtistsHandler
 from xml.sax import make_parser
 
 
-def make_handler(file: str, collector):
+def make_handler(file: str):
     if 'labels' in file:
-        return LabelsHandler(collector)
+        return LabelsHandler
+    if 'artists' in file:
+        return ArtistsHandler
     return None
 
 
@@ -28,13 +30,13 @@ def time_format(time: float):
 def main(argv):
     file = argv[0]
     collector = stats.StatsCollector()
-    handler = make_handler(file, collector)
+    handler = make_handler(file)
     if handler is None:
         print(f"I don't know how to handle {file}.")
         sys.exit(2)
 
     parser = make_parser()
-    parser.setContentHandler(handler)
+    parser.setContentHandler(handler(collector))
     ts = time.time()
     parse(file, parser)
     elapsed = time.time() - ts
