@@ -10,8 +10,11 @@ namespace XmlPerformance
 {
     interface IParser
     {
+#if ASYNC
         Task<int> ParseAsync(IVisitor statsCollector);
+#else
         int Parse(IVisitor statsCollector);
+#endif
     }
 
     /// <summary>
@@ -27,7 +30,12 @@ namespace XmlPerformance
         {
             this._file = file;
         }
+
+#if ASYNC
         public async Task<int> ParseAsync(IVisitor statsCollector) {
+#else
+        public int Parse(IVisitor statsCollector) {
+#endif
             var nodes = 0;
             var readerSettings = new XmlReaderSettings {
                 Async = true
@@ -38,32 +46,12 @@ namespace XmlPerformance
                     reader.ReadToFollowing(MainNodeName);
                     T current = new T();
                     string lastElement = null;
-                    while (await reader.ReadAsync()) {
-                        Read(reader, ref current, ref lastElement, statsCollector);
-                        nodes++;
-                    }
-                    if (current != null) {
-                        CollectStats(statsCollector, current);
-                    }
-                }
-            } finally {
-                inputStream.Dispose();
-            }
-            return nodes;
-        }
-
-        public int Parse(IVisitor statsCollector) {
-            var nodes = 0;
-            var readerSettings = new XmlReaderSettings {
-                Async = false
-            };
-            InputStream inputStream = GetInputStream();
-            try {
-                using (var reader = XmlReader.Create(inputStream.ReadStream, readerSettings)) {
-                    reader.ReadToFollowing(MainNodeName);
-                    T current = new T();
-                    string lastElement = null;
-                    while (reader.Read()) {
+#if ASYNC
+                    while (await reader.ReadAsync())
+#else
+                    while(reader.Read())
+#endif
+                    {
                         Read(reader, ref current, ref lastElement, statsCollector);
                         nodes++;
                     }
