@@ -1,21 +1,21 @@
-const fs = require('fs');
+const fs = require("fs");
 function parseLabels(file, collector, done) {
     const strict = true, options = false;
     let saxStream = require("sax").createStream(strict, options);
     let make = () => new Label();
     // let textNodes = ["id", "name", "contactInfo", "profile", "data_quality", "url"];
-    let ignoreNodes=['images', 'sublabels'];
-    let textBuffer = '';
-    let currentNode = '';
+    let ignoreNodes=["images", "sublabels"];
+    let textBuffer = "";
+    let currentNode = "";
     let currentModel = make();
-    let mainNode = 'label';
+    let mainNode = "label";
     const nodeMap = {
-        'id': (l, v) => { l.id = parseInt(v); },
-        'name': (l, v) => { l.name = v; },
-        'contactInfo': (l, v) => { l.contactInfo = v; },
-        'profile': (l, v) => { l.profile = v; },
-        'data_quality': (l, v) => { l.dataQuality = v; },
-        'url': (l, v) => { l.urls.push(v); },
+        "id": (l, v) => { l.id = parseInt(v); },
+        "name": (l, v) => { l.name = v; },
+        "contactInfo": (l, v) => { l.contactInfo = v; },
+        "profile": (l, v) => { l.profile = v; },
+        "data_quality": (l, v) => { l.dataQuality = v; },
+        "url": (l, v) => { l.urls.push(v); },
     };
     let setText = (model, name, text) => {
         if (name in nodeMap) {
@@ -36,44 +36,50 @@ function parseLabels(file, collector, done) {
     saxStream.on("opentag", node => {
         // console.debug(`> ${node.name}`);
         // if we're currently inside an ignore node, we'll skip this start node
-        if (currentNode in ignoreNodes) {
-            textBuffer = '';
+        if (ignoreNodes.includes(currentNode)) {
+            textBuffer = "";
             return;
         }
         currentNode = node.name;
+        // we've encountered an ignorable node
+        if (ignoreNodes.includes(currentNode)) {
+            textBuffer = "";
+            return;
+        }
         if (currentNode == mainNode) {
             // starting new node
             currentModel = make();
-            textBuffer = '';
+            textBuffer = "";
         }
     });
-    saxStream.on('closetag', nodeName => {
+    saxStream.on("closetag", nodeName => {
         // if name is in _ignore_nodes, it means we're done ignoring
-        if (nodeName in ignoreNodes) {
+        if (ignoreNodes.includes(nodeName)) {
             currentNode = null;
-            textBuffer = '';
+            textBuffer = "";
             return;
         }
         // we're inside an ignore node, we don't care about processing
-        if (currentNode in ignoreNodes) {
-            textBuffer = '';
+        if (ignoreNodes.includes(currentNode)) {
+            textBuffer = "";
             return;
         }
         // if it's the end of the main node, let's collect it
         if (nodeName == mainNode) {
+            if (currentModel.id == 0) console.debug(`id=0 on node ${nodeName}.`);
             collector.collect(currentModel);
-            textBuffer = '';
+            textBuffer = "";
             return;
         }
         // it means we're in a regular node
         setText(currentModel, nodeName, textBuffer);
     });
-    saxStream.on('text', text => {
+    saxStream.on("text", text => {
         textBuffer = text;
     });
 
-    saxStream.on('end', () => { 
-        console.log('Stream done');
+    saxStream.on("end", () => { 
+        console.log("Stream done");
         done();
     });
     // pipe is supported, and it's readable/writable
@@ -114,16 +120,16 @@ class Artist { // eslint-disable-line no-unused-vars
 class StatsCollector {
     constructor() {
         this.dataQualityLedger = {
-            'Needs Vote': 0,
-            'Complete and Correct': 0,
-            'Correct': 0,
-            'Needs Minor Changes': 0,
-            'Needs Major Changes': 0,
-            'Entirely Incorrect': 0,
-            'Entirely Incorrect Edit': 0
+            "Needs Vote": 0,
+            "Complete and Correct": 0,
+            "Correct": 0,
+            "Needs Minor Changes": 0,
+            "Needs Major Changes": 0,
+            "Entirely Incorrect": 0,
+            "Entirely Incorrect Edit": 0
         };
         this.numberFormatter = new Intl.NumberFormat(
-            'en-US',
+            "en-US",
             { useGrouping: true }
         );
     }
@@ -147,7 +153,7 @@ class StatsCollector {
 
         orderedKeys.forEach(key => {
             let val = this.dataQualityLedger[key];
-            logger.log(`${key} = ${this.numberFormatter.format(val)}`);
+            logger.log(`  ${key.padEnd(25)} = ${this.numberFormatter.format(val).padStart(10)}`);
         });
     }
 }
@@ -156,8 +162,8 @@ class StatsCollector {
 function main(file) {
     console.debug(`Parsing: ${file}.`);
     let stats = new StatsCollector();
-    if (file.indexOf('labels') > -1) {
-        console.debug(`Parsing labels`);
+    if (file.indexOf("labels") > -1) {
+        console.debug("Performing labels test");
         parseLabels(file, stats, () => stats.printStats(console));
     }
     // stats.printStats(console);
