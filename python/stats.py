@@ -14,7 +14,7 @@ class StatsCollector:
     def __init__(self):
         global DATA_QUALITY_VALUES
         self._data_quality = {dq: 0 for dq in DATA_QUALITY_VALUES}
-        self._keymap = {dq.lower():dq for dq in DATA_QUALITY_VALUES}
+        self._keymap = {dq.lower(): dq for dq in DATA_QUALITY_VALUES}
 
     def collect(self, model):
         if model.id == 0:
