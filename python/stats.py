@@ -29,5 +29,5 @@ class StatsCollector:
     def __str__(self):
         # print(self._data_quality)
         totals = sum(self._data_quality.values())
-        lines = "\n".join(sorted([f"{key.ljust(25)} = {value: >10,}" for key, value in self._data_quality.items()]))
+        lines = "\n".join(sorted([f"  {key.ljust(25)} = {value: >10,}" for key, value in self._data_quality.items()]))
         return f"Total: {totals} entries.\n{lines}"
