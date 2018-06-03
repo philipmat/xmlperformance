@@ -1,0 +1,27 @@
+{
+  "name": "xmlperformance",
+  "version": "1.0.0",
+  "description": "Comparing XML performance across languages",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/philipmat/xmlperformance.git"
+  },
+  "keywords": [
+    "xml",
+    "performance",
+    "sax"
+  ],
+  "author": "Philip Mateescu",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/philipmat/xmlperformance/issues"
+  },
+  "homepage": "https://github.com/philipmat/xmlperformance#readme",
+  "dependencies": {
+    "sax": "^1.2.4"
+  }
+}

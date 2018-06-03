@@ -3,7 +3,7 @@
 LABELS = labels-20180514_test56.xml
 ARTISTS = artists-20180514_test50.xml
 
-run-all: net-all py-all
+run-all: net-all py-all js-all
 
 # .NET
 
@@ -32,6 +32,14 @@ py-artists:
 	python3 python/main.py ./data/$(ARTISTS)
 
 py-all: py-labels py-artists
+
+js-labels:
+	node nodejs/index.js ./data/$(LABELS)
+
+js-artists:
+	node nodejs/index.js ./data/$(ARTISTS)
+
+js-all: js-labels js-artists
 
 # tests:
 # 	pipenv run python -m unittest
