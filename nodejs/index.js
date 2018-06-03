@@ -164,7 +164,11 @@ function main(file) {
     let stats = new StatsCollector();
     if (file.indexOf("labels") > -1) {
         console.debug("Performing labels test");
-        parseLabels(file, stats, () => stats.printStats(console));
+        console.time("parseLabels");
+        parseLabels(file, stats, () => {
+            console.timeEnd("parseLabels");
+            stats.printStats(console);
+        });
     }
     // stats.printStats(console);
 }
